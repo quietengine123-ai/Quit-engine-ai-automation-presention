@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiet Engine ai automation presentaion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0c0c0b;
+      --fg: #f0ece3;
+      --accent: #c8a96e;
+      --muted: #5a5651;
+      --line: #1e1d1a;
+      --card: #0f0f0e;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      padding: 26px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.4s, background 0.4s;
+    }
+    nav.scrolled { background: rgba(12,12,11,0.93); backdrop-filter: blur(12px); border-color: var(--line); }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; letter-spacing: 0.08em; color: var(--fg); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-cta { padding: 10px 24px; border: 1px solid var(--accent); color: var(--accent); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; transition: background 0.3s, color 0.3s; }
+    .nav-cta:hover { background: var(--accent); color: var(--bg); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--fg); transition: transform 0.3s, opacity 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu { display: none; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 48px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 55% 60% at 80% 20%, rgba(200,169,110,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 10% 90%, rgba(200,169,110,0.04) 0%, transparent 60%);
+    }
+    /* Animated grid lines */
+    .grid-lines {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.4;
+      mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 0%, transparent 70%);
+    }
+    .hero-line {
+      position: absolute; width: 1px; height: 35vh;
+      background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+      left: 48px; top: 120px; opacity: 0.5;
+      animation: pulse-line 4s ease-in-out infinite;
+    }
+    @keyframes pulse-line { 0%,100%{opacity:0.3}50%{opacity:0.7} }
+
+    .hero-label { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3.2rem, 7.5vw, 7rem); line-height: 1.0; font-weight: 700; letter-spacing: -0.02em; opacity: 0; animation: fadeUp 0.9s 0.4s forwards; }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-sub { max-width: 500px; font-size: 0.95rem; line-height: 1.85; color: var(--muted); margin-top: 32px; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
+    .hero-cta { display: flex; gap: 20px; align-items: center; margin-top: 52px; opacity: 0; animation: fadeUp 0.9s 0.8s forwards; }
+    .btn-primary { padding: 14px 36px; background: var(--accent); color: var(--bg); font-family: 'DM Sans',sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; transition: background 0.3s, transform 0.3s; }
+    .btn-primary:hover { background: #d4bb88; transform: translateY(-2px); }
+    .btn-ghost { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 10px; transition: color 0.3s; }
+    .btn-ghost::after { content: '→'; transition: transform 0.3s; }
+    .btn-ghost:hover { color: var(--fg); }
+    .btn-ghost:hover::after { transform: translateX(4px); }
+    .hero-scroll { position: absolute; right: 48px; bottom: 80px; writing-mode: vertical-lr; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; opacity: 0; animation: fadeUp 1s 1.2s forwards; }
+    .hero-scroll::before { content:''; width:1px; height:50px; background:var(--muted); animation: scroll-line 2s ease-in-out infinite; }
+    @keyframes scroll-line { 0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── TICKER ── */
+    .ticker { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:16px 0; overflow:hidden; white-space:nowrap; }
+    .ticker-inner { display:inline-flex; gap:64px; animation:ticker 22s linear infinite; }
+    .ticker-item { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:16px; }
+    .ticker-item span { color:var(--accent); }
+    @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── SECTIONS ── */
+    section { padding: 120px 48px; }
+    .section-label { font-size:0.7rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:60px; display:flex; align-items:center; gap:16px; }
+    .section-label::before { content:''; width:40px; height:1px; background:var(--accent); }
+
+    /* ── SERVICES (4 cards) ── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .service-card {
+      background: var(--bg);
+      padding: 56px 48px;
+      position: relative; overflow: hidden;
+      transition: background 0.4s;
+    }
+    .service-card::before { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform 0.4s ease; }
+    .service-card:hover::before { transform:scaleX(1); }
+    .service-card:hover { background:#111110; }
+
+    .service-num { font-size:0.65rem; letter-spacing:0.2em; color:var(--accent); margin-bottom:32px; }
+    .service-icon-wrap {
+      width: 56px; height: 56px;
+      border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+      transition: border-color 0.4s;
+    }
+    .service-card:hover .service-icon-wrap { border-color: var(--accent); }
+    .service-icon { width: 28px; height: 28px; opacity: 0.75; }
+    .service-title { font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:400; line-height:1.2; margin-bottom:18px; }
+    .service-desc { font-size:0.88rem; line-height:1.95; color:var(--muted); }
+    .service-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:32px; }
+    .tag { font-size:0.63rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); padding:5px 12px; transition:border-color 0.3s,color 0.3s; }
+    .service-card:hover .tag { border-color:var(--muted); color:var(--fg); }
+
+    /* ── HOW IT WORKS ── */
+    .how-strip {
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+    }
+    .how-inner { padding: 100px 48px; }
+    .how-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+    .how-heading { font-family:'Playfair Display',serif; font-size:clamp(2.4rem,4vw,4rem); font-weight:400; line-height:1.15; margin-bottom:28px; }
+    .how-heading em { font-style:italic; color:var(--accent); }
+    .how-body { font-size:0.92rem; line-height:1.9; color:var(--muted); margin-bottom:40px; }
+    .steps-list { display:flex; flex-direction:column; gap:0; }
+    .step-row {
+      display: flex; align-items: flex-start; gap: 28px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .step-row:first-child { border-top: 1px solid var(--line); }
+    .step-n { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--accent); min-width:36px; }
+    .step-content h4 { font-size:0.92rem; font-weight:500; letter-spacing:0.04em; margin-bottom:6px; }
+    .step-content p { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+    /* ── STATS ── */
+    .stats-section {
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1px;
+      background: var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .stat-box { background:var(--bg); padding:60px 40px; text-align:center; transition:background 0.3s; }
+    .stat-box:hover { background:#111110; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:3.2rem; font-weight:700; color:var(--accent); line-height:1; }
+    .stat-label { font-size:0.73rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--muted); margin-top:10px; }
+
+    /* ── INTEGRATIONS ── */
+    .integrations-section { padding: 120px 48px; }
+    .integration-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      margin-top: 0;
+    }
+    .int-card {
+      background: var(--bg);
+      padding: 44px 40px;
+      position: relative;
+      transition: background 0.4s;
+      overflow: hidden;
+    }
+    .int-card::after { content:''; position:absolute; top:0; left:0; width:2px; height:100%; background:var(--accent); transform:scaleY(0); transform-origin:top; transition:transform 0.4s; }
+    .int-card:hover::after { transform:scaleY(1); }
+    .int-card:hover { background:#111110; }
+    .int-icon { width:40px; height:40px; margin-bottom:20px; opacity:0.7; }
+    .int-title { font-size:0.95rem; font-weight:500; letter-spacing:0.06em; margin-bottom:10px; }
+    .int-desc { font-size:0.82rem; line-height:1.8; color:var(--muted); }
+
+    /* ── CTA ── */
+    .cta-section { padding:140px 48px; text-align:center; position:relative; overflow:hidden; }
+    .cta-bg { position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 50%, rgba(200,169,110,0.05) 0%, transparent 70%); }
+    .cta-title { font-family:'Playfair Display',serif; font-size:clamp(3rem,7vw,6rem); font-weight:700; line-height:1.05; position:relative; }
+    .cta-title em { font-style:italic; color:var(--accent); }
+    .cta-sub { font-size:0.95rem; color:var(--muted); margin:28px auto 52px; max-width:420px; line-height:1.85; }
+    .btn-large { display:inline-block; padding:18px 56px; background:var(--accent); color:var(--bg); font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; text-decoration:none; transition:background 0.3s, transform 0.3s; }
+    .btn-large:hover { background:#d4bb88; transform:translateY(-3px); }
+
+    /* ── FOOTER ── */
+    footer { border-top:1px solid var(--line); padding:52px 48px; display:flex; justify-content:space-between; align-items:center; }
+    .footer-logo { font-family:'Playfair Display',serif; font-size:1.1rem; letter-spacing:0.08em; }
+    .footer-logo span { color:var(--accent); }
+    .footer-copy { font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+    .footer-links { display:flex; gap:28px; }
+    .footer-links a { font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.3s; }
+    .footer-links a:hover { color:var(--accent); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity:0; transform:translateY(40px); transition:opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      nav { padding: 22px 24px; }
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 32px; position: fixed; inset: 0; background: var(--bg); z-index: 150;
+        opacity: 0; pointer-events: none; transition: opacity 0.4s;
+      }
+      .mobile-menu.open { opacity: 1; pointer-events: all; }
+      .mobile-menu a { font-family:'Playfair Display',serif; font-size:2rem; color:var(--fg); text-decoration:none; transition:color 0.3s; }
+      .mobile-menu a:hover { color:var(--accent); }
+      .hero { padding: 0 24px 60px; }
+      .hero-line { left: 24px; }
+      .hero-scroll { display: none; }
+      section { padding: 80px 24px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .how-inner { padding: 70px 24px; }
+      .how-grid { grid-template-columns: 1fr; gap: 48px; }
+      .stats-section { grid-template-columns: 1fr 1fr; }
+      .integration-row { grid-template-columns: 1fr; }
+      .integrations-section { padding: 80px 24px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; padding: 40px 24px; }
+      .cta-section { padding: 100px 24px; }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 18px 20px; }
+      .hero { padding: 0 20px 56px; min-height: 100svh; }
+      .hero-title { font-size: clamp(2.6rem, 11vw, 4rem); }
+      .hero-cta { flex-direction: column; align-items: flex-start; gap: 16px; margin-top: 36px; }
+      .btn-primary { width: 100%; text-align: center; }
+      section { padding: 64px 20px; }
+      .service-card { padding: 40px 24px; }
+      .how-inner { padding: 56px 20px; }
+      .stats-section { grid-template-columns: 1fr 1fr; }
+      .stat-box { padding: 44px 20px; }
+      .stat-num { font-size: 2.4rem; }
+      .integrations-section { padding: 64px 20px; }
+      .int-card { padding: 36px 24px; }
+      .cta-section { padding: 80px 20px; }
+      .btn-large { width: 100%; text-align: center; }
+      footer { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+   <a href="#" class="logo">
+  <img src="./quite engin.png" alt="quiet engine" style="height: 29px; width: auto; object-fit: contain;" />
+    <ul class="nav-links">
+      <li><a href="#services">Solutions</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#integrations">Integrations</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Get Started</a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#services" class="mm-link">Solutions</a>
+    <a href="#how" class="mm-link">How It Works</a>
+    <a href="#integrations" class="mm-link">Integrations</a>
+    <a href="#contact" class="mm-link">Contact</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="grid-lines"></div>
+    <div class="hero-line"></div>
+    <p class="hero-label">AI Automation · Intelligent Systems</p>
+    <h1 class="hero-title">
+      Automate the<br/>
+      work. <em>Amplify</em><br/>
+      the results.
+    </h1>
+    <p class="hero-sub">RTH AI builds intelligent automation systems — chatbots, WhatsApp agents, CRM pipelines, and booking engines — so your business runs smarter, around the clock.</p>
+    <div class="hero-cta">
+      <a href="https://wa.me/918767968595" class="btn-primary">Book a Demo</a>
+      <a href="#services" class="btn-ghost">Explore Solutions</a>
+    </div>
+    <div class="hero-scroll">Scroll</div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span class="ticker-item">AI Chatbots <span>✦</span></span>
+      <span class="ticker-item">WhatsApp Automation <span>✦</span></span>
+      <span class="ticker-item">CRM Integration <span>✦</span></span>
+      <span class="ticker-item">Auto Appointment Booking <span>✦</span></span>
+      <span class="ticker-item">Lead Nurturing <span>✦</span></span>
+      <span class="ticker-item">24/7 AI Support <span>✦</span></span>
+      <span class="ticker-item">AI Chatbots <span>✦</span></span>
+      <span class="ticker-item">WhatsApp Automation <span>✦</span></span>
+      <span class="ticker-item">CRM Integration <span>✦</span></span>
+      <span class="ticker-item">Auto Appointment Booking <span>✦</span></span>
+      <span class="ticker-item">Lead Nurturing <span>✦</span></span>
+      <span class="ticker-item">24/7 AI Support <span>✦</span></span>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <p class="section-label reveal">Our Solutions</p>
+    <div class="services-grid">
+
+      <!-- AI Chatbots -->
+      <div class="service-card reveal">
+        <p class="service-num">01</p>
+        <div class="service-icon-wrap">
+          <svg class="service-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="2" y="4" width="24" height="16" rx="3"/>
+            <path d="M9 20v4l5-4"/>
+            <circle cx="9" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="14" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <h3 class="service-title">AI Chatbots</h3>
+        <p class="service-desc">Deploy intelligent conversational agents trained on your business data. Our AI chatbots understand context, handle complex queries, qualify leads, and provide instant support — 24 hours a day, 7 days a week, without human intervention. They learn and improve with every interaction.</p>
+        <div class="service-tags">
+          <span class="tag">NLP Powered</span>
+          <span class="tag">Custom Training</span>
+          <span class="tag">Multi-language</span>
+          <span class="tag">Lead Capture</span>
+          <span class="tag">24/7 Active</span>
+        </div>
+      </div>
+
+      <!-- WhatsApp AI -->
+      <div class="service-card reveal" style="transition-delay:0.1s">
+        <p class="service-num">02</p>
+        <div class="service-icon-wrap">
+          <svg class="service-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M14 2C7.373 2 2 7.373 2 14c0 2.09.54 4.05 1.49 5.76L2 26l6.39-1.47A11.94 11.94 0 0014 26c6.627 0 12-5.373 12-12S20.627 2 14 2z"/>
+            <path d="M10 11.5c.5-1 1.5-1.5 2.5-1.5 1.5 0 2.5 1 2.5 2.5 0 2-2.5 3-2.5 5" stroke-linecap="round"/>
+            <path d="M18 18.5c-.5.8-1.5 1.5-3 1.5-1 0-2-.4-2.5-1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="service-title">WhatsApp AI<br/>Chatbot</h3>
+        <p class="service-desc">Meet your customers where they already are. Our WhatsApp AI agent handles inquiries, sends proactive updates, processes orders, collects information, and books appointments — all through the world's most popular messaging platform with a 98% open rate.</p>
+        <div class="service-tags">
+          <span class="tag">WhatsApp Business API</span>
+          <span class="tag">Broadcast Messages</span>
+          <span class="tag">Rich Media</span>
+          <span class="tag">Order Tracking</span>
+        </div>
+      </div>
+
+      <!-- CRM Integration -->
+      <div class="service-card reveal" style="transition-delay:0.15s">
+        <p class="service-num">03</p>
+        <div class="service-icon-wrap">
+          <svg class="service-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="7" cy="7" r="3"/>
+            <circle cx="21" cy="7" r="3"/>
+            <circle cx="14" cy="21" r="3"/>
+            <line x1="10" y1="7" x2="18" y2="7"/>
+            <line x1="7" y1="10" x2="14" y2="18"/>
+            <line x1="21" y1="10" x2="14" y2="18"/>
+          </svg>
+        </div>
+        <h3 class="service-title">CRM<br/>Integration</h3>
+        <p class="service-desc">Seamlessly connect your AI systems with your existing CRM — HubSpot, Salesforce, Zoho, and more. Every conversation, lead, and interaction is automatically logged, scored, and pushed into your pipeline. Zero manual data entry, total visibility.</p>
+        <div class="service-tags">
+          <span class="tag">HubSpot</span>
+          <span class="tag">Salesforce</span>
+          <span class="tag">Zoho</span>
+          <span class="tag">Auto Sync</span>
+          <span class="tag">Lead Scoring</span>
+        </div>
+      </div>
+
+      <!-- Appointment Booking -->
+      <div class="service-card reveal" style="transition-delay:0.2s">
+        <p class="service-num">04</p>
+        <div class="service-icon-wrap">
+          <svg class="service-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="3" y="5" width="22" height="20" rx="2"/>
+            <line x1="3" y1="11" x2="25" y2="11"/>
+            <line x1="9" y1="3" x2="9" y2="7"/>
+            <line x1="19" y1="3" x2="19" y2="7"/>
+            <rect x="8" y="15" width="4" height="4" rx="0.5" fill="currentColor" stroke="none" opacity="0.6"/>
+            <rect x="16" y="15" width="4" height="4" rx="0.5" fill="currentColor" stroke="none" opacity="0.6"/>
+          </svg>
+        </div>
+        <h3 class="service-title">Auto Appointment<br/>Booking</h3>
+        <p class="service-desc">Let AI handle your entire scheduling workflow. Customers book, reschedule, and cancel appointments through chat — the system syncs with your calendar in real time, sends reminders, handles no-shows, and fills gaps automatically. No back-and-forth, ever.</p>
+        <div class="service-tags">
+          <span class="tag">Calendar Sync</span>
+          <span class="tag">Auto Reminders</span>
+          <span class="tag">Rescheduling</span>
+          <span class="tag">No-show Follow-up</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-section">
+    <div class="stat-box reveal">
+      <div class="stat-num">98%</div>
+      <div class="stat-label">WhatsApp Open Rate</div>
+    </div>
+    <div class="stat-box reveal" style="transition-delay:0.1s">
+      <div class="stat-num">3×</div>
+      <div class="stat-label">Faster Response Time</div>
+    </div>
+    <div class="stat-box reveal" style="transition-delay:0.2s">
+      <div class="stat-num">60%</div>
+      <div class="stat-label">Reduction in Support Costs</div>
+    </div>
+    <div class="stat-box reveal" style="transition-delay:0.3s">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Always On, Never Tired</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-strip" id="how">
+    <div class="how-inner">
+      <div class="how-grid">
+        <div class="reveal">
+          <p class="section-label">How It Works</p>
+          <h2 class="how-heading">From setup to<br/><em>live</em> in days,<br/>not months.</h2>
+          <p class="how-body">We handle the entire implementation — from training your AI on your business knowledge to connecting it with your tools. You get a fully operational automation system without a single line of code written by your team.</p>
+          <a href="#contact" class="btn-primary">Start Today</a>
+        </div>
+        <div class="steps-list reveal" style="transition-delay:0.15s">
+          <div class="step-row">
+            <div class="step-n">01</div>
+            <div class="step-content">
+              <h4>Discovery & Scoping</h4>
+              <p>We audit your current workflows, identify automation opportunities, and define the exact systems to build for maximum ROI.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-n">02</div>
+            <div class="step-content">
+              <h4>AI Training & Setup</h4>
+              <p>Your chatbot is trained on your products, FAQs, tone of voice, and business rules. We configure every integration and flow.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-n">03</div>
+            <div class="step-content">
+              <h4>Integration & Testing</h4>
+              <p>We connect your CRM, calendar, WhatsApp, and website. Rigorous testing ensures every scenario is handled flawlessly.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-n">04</div>
+            <div class="step-content">
+              <h4>Launch & Optimise</h4>
+              <p>Go live with full monitoring. We continuously analyse conversations and improve performance based on real data.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATIONS -->
+  <section class="integrations-section" id="integrations">
+    <p class="section-label reveal">Connects With Everything</p>
+    <div class="integration-row">
+      <div class="int-card reveal">
+        <svg class="int-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="4" y="4" width="32" height="32" rx="4"/>
+          <path d="M13 20h14M20 13v14"/>
+        </svg>
+        <div class="int-title">Website Widget</div>
+        <div class="int-desc">Embed an AI chat bubble on any website in minutes. Supports all platforms — WordPress, Shopify, Webflow, custom.</div>
+      </div>
+      <div class="int-card reveal" style="transition-delay:0.1s">
+        <svg class="int-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="20" cy="20" r="16"/>
+          <path d="M20 12v8l5 5"/>
+        </svg>
+        <div class="int-title">Google Calendar</div>
+        <div class="int-desc">Real-time two-way sync with Google Calendar. Bookings appear instantly, conflicts are prevented automatically.</div>
+      </div>
+      <div class="int-card reveal" style="transition-delay:0.2s">
+        <svg class="int-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="6" y="10" width="28" height="20" rx="2"/>
+          <path d="M6 16l14 8 14-8"/>
+        </svg>
+        <div class="int-title">Email & SMS</div>
+        <div class="int-desc">Automated follow-ups, reminders, and confirmations via email and SMS triggered by AI conversations.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contact">
+    <div class="cta-bg"></div>
+    <h2 class="cta-title reveal">
+      Ready to run<br/>on <em>autopilot?</em>
+    </h2>
+    <p class="cta-sub reveal">Let's build your AI automation system. Book a free 30-minute strategy call — no commitment, just clarity.</p>
+    <a href="https://wa.me/918080360048" class="btn-large reveal">Book Free Call</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div  href="#" class="logo">
+  <img src="./quite engin.png" alt="quiet engine" style="height: 29px; width: auto; object-fit: contain;" /></div>
+    <p class="footer-copy">© 2024 quiet engine. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">LinkedIn</a>
+      <a href="#">Instagram</a>
+      <a href="#">WhatsApp</a>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Hamburger
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+    });
+    document.querySelectorAll('.mm-link').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+      });
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    reveals.forEach(r => observer.observe(r));
+  </script>
+</body>
+</html>
